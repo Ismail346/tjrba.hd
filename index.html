@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>القرآن الكريم - جميع السور</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         /* التصميم العام */
@@ -21,6 +21,8 @@
             color: #333;
             line-height: 1.6;
             padding: 20px;
+            direction: rtl;
+            text-align: right;
         }
 
         .container {
@@ -51,6 +53,7 @@
             font-size: 1rem;
             border: 1px solid #ccc;
             border-radius: 5px;
+            direction: rtl;
         }
 
         .surah-list {
@@ -75,6 +78,8 @@
             font-size: 1.5rem;
             color: #16a085;
             margin-bottom: 10px;
+            white-space: normal;
+            overflow: visible;
         }
 
         .verses-container {
@@ -90,6 +95,8 @@
             margin-bottom: 10px;
             font-size: 1.2rem;
             color: #333;
+            white-space: normal;
+            overflow: visible;
         }
 
         .verse-number {
@@ -105,23 +112,19 @@
             }
 
             .surah-name {
-                font-size: 1.3rem;
+                font-size: 1.2rem; /* حجم أصغر للهواتف */
             }
 
             .verse {
-                font-size: 1rem;
+                font-size: 1rem; /* حجم أصغر للهواتف */
             }
         }
     </style>
 </head>
 <body>
 
-
-
     <!-- زر التحكم -->
     <button class="toggle-btn" id="toggleButton">☰</button>
-
-
 
     <!-- القائمة الجانبية -->
     <div class="sidebar" id="sidebar">
@@ -162,126 +165,122 @@
     </div>
 
     <script>
-    let allSurahs = []; // لتخزين جميع السور
+        let allSurahs = []; // لتخزين جميع السور
 
-    // دالة لجلب جميع السور من API
-    async function fetchAllSurahs() {
-        try {
-            const response = await fetch('https://api.alquran.cloud/v1/surah');
-            const data = await response.json();
+        // دالة لجلب جميع السور من API
+        async function fetchAllSurahs() {
+            try {
+                const response = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await response.json();
 
-            if (data.code === 200) {
-                allSurahs = data.data; // تخزين جميع السور
-                displaySurahs(allSurahs);
-            } else {
-                console.error("حدث خطأ أثناء جلب البيانات");
+                if (data.code === 200) {
+                    allSurahs = data.data; // تخزين جميع السور
+                    displaySurahs(allSurahs);
+                } else {
+                    console.error("حدث خطأ أثناء جلب البيانات");
+                }
+            } catch (error) {
+                console.error("حدث خطأ في الاتصال بالخادم:", error);
             }
-        } catch (error) {
-            console.error("حدث خطأ في الاتصال بالخادم:", error);
         }
-    }
 
-    // دالة لعرض قائمة السور
-    function displaySurahs(surahs) {
-        const surahListElement = document.getElementById('surah-list');
-        surahListElement.innerHTML = ''; // مسح المحتوى القديم
+        // دالة لعرض قائمة السور
+        function displaySurahs(surahs) {
+            const surahListElement = document.getElementById('surah-list');
+            surahListElement.innerHTML = ''; // مسح المحتوى القديم
 
-        surahs.forEach(surah => {
-            const surahItem = document.createElement('div');
-            surahItem.classList.add('surah-item');
+            surahs.forEach(surah => {
+                const surahItem = document.createElement('div');
+                surahItem.classList.add('surah-item');
 
-            surahItem.innerHTML = `
-                <div class="surah-name">${surah.name} (${surah.englishName})</div>
-                <div class="verses-container" id="verses-${surah.number}"></div>
-            `;
+                surahItem.innerHTML = `
+                    <div class="surah-name">${surah.name} (${surah.englishName})</div>
+                    <div class="verses-container" id="verses-${surah.number}"></div>
+                `;
 
-            // إضافة حدث النقر لعرض أو إخفاء الآيات
-            const surahNameElement = surahItem.querySelector('.surah-name');
-            surahNameElement.addEventListener('click', () => {
-                toggleVerses(surah.number);
+                // إضافة حدث النقر لعرض أو إخفاء الآيات
+                const surahNameElement = surahItem.querySelector('.surah-name');
+                surahNameElement.addEventListener('click', () => {
+                    toggleVerses(surah.number);
+                });
+
+                surahListElement.appendChild(surahItem);
+            });
+        }
+
+        // دالة لجلب آيات سورة معينة
+        async function fetchSurah(surahNumber) {
+            try {
+                const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`);
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    const surah = data.data;
+                    displayVerses(surah);
+                } else {
+                    console.error("حدث خطأ أثناء جلب البيانات");
+                }
+            } catch (error) {
+                console.error("حدث خطأ في الاتصال بالخادم:", error);
+            }
+        }
+
+        // دالة لعرض آيات السورة
+        function displayVerses(surah) {
+            const versesContainer = document.getElementById(`verses-${surah.number}`);
+
+            // مسح المحتوى القديم
+            versesContainer.innerHTML = '';
+
+            // عرض الآيات
+            surah.ayahs.forEach(ayah => {
+                const verseElement = document.createElement('p');
+                verseElement.classList.add('verse');
+                verseElement.innerHTML = `
+                    <span class="verse-text">${ayah.text}</span>
+                    <span class="verse-number">(${ayah.numberInSurah})</span>
+                `;
+                versesContainer.appendChild(verseElement);
             });
 
-            surahListElement.appendChild(surahItem);
-        });
-    }
+            // إظهار قسم الآيات
+            versesContainer.style.display = 'block';
+        }
 
-    // دالة لجلب آيات سورة معينة
-    async function fetchSurah(surahNumber) {
-        try {
-            const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`);
-            const data = await response.json();
+        // دالة لإظهار أو إخفاء الآيات
+        function toggleVerses(surahNumber) {
+            const versesContainer = document.getElementById(`verses-${surahNumber}`);
 
-            if (data.code === 200) {
-                const surah = data.data;
-                displayVerses(surah);
+            if (versesContainer.style.display === 'none' || versesContainer.style.display === '') {
+                fetchSurah(surahNumber); // جلب الآيات إذا لم تكن معروضة
             } else {
-                console.error("حدث خطأ أثناء جلب البيانات");
+                versesContainer.style.display = 'none'; // إخفاء الآيات
             }
-        } catch (error) {
-            console.error("حدث خطأ في الاتصال بالخادم:", error);
         }
-    }
 
-    // دالة لعرض آيات السورة
-    function displayVerses(surah) {
-        const versesContainer = document.getElementById(`verses-${surah.number}`);
-
-        // مسح المحتوى القديم
-        versesContainer.innerHTML = '';
-
-        // عرض الآيات
-        surah.ayahs.forEach(ayah => {
-            const verseElement = document.createElement('p');
-            verseElement.classList.add('verse');
-            verseElement.innerHTML = `
-                <span class="verse-text">${ayah.text}</span>
-                <span class="verse-number">(${ayah.numberInSurah})</span>
-            `;
-            versesContainer.appendChild(verseElement);
-        });
-
-        // إظهار قسم الآيات
-        versesContainer.style.display = 'block';
-    }
-
-    // دالة لإظهار أو إخفاء الآيات
-    function toggleVerses(surahNumber) {
-        const versesContainer = document.getElementById(`verses-${surahNumber}`);
-
-        if (versesContainer.style.display === 'none' || versesContainer.style.display === '') {
-            fetchSurah(surahNumber); // جلب الآيات إذا لم تكن معروضة
-        } else {
-            versesContainer.style.display = 'none'; // إخفاء الآيات
+        // دالة لتصفية السور بناءً على البحث
+        function filterSurahs() {
+            const searchText = removeTashkeel(document.getElementById('searchInput').value.toLowerCase());
+            const filteredSurahs = allSurahs.filter(surah => {
+                const surahName = removeTashkeel(surah.name.toLowerCase());
+                const surahEnglishName = removeTashkeel(surah.englishName.toLowerCase());
+                return (
+                    surahName.includes(searchText) ||
+                    surahEnglishName.includes(searchText)
+                );
+            });
+            displaySurahs(filteredSurahs);
         }
-    }
 
-    // دالة لتصفية السور بناءً على البحث
-    function filterSurahs() {
-        const searchText = removeTashkeel(document.getElementById('searchInput').value.toLowerCase());
-        const filteredSurahs = allSurahs.filter(surah => {
-            const surahName = removeTashkeel(surah.name.toLowerCase());
-            const surahEnglishName = removeTashkeel(surah.englishName.toLowerCase());
-            return (
-                surahName.includes(searchText) ||
-                surahEnglishName.includes(searchText)
-            );
-        });
-        displaySurahs(filteredSurahs);
-    }
+        // دالة لإزالة التشكيل من النص
+        function removeTashkeel(text) {
+            return text.replace(/[\u064B-\u065F\u0610-\u061A]/g, '');
+        }
 
-    // دالة لإزالة التشكيل من النص
-    function removeTashkeel(text) {
-        return text.replace(/[\u064B-\u065F\u0610-\u061A]/g, '');
-    }
-
-    // جلب جميع السور عند تحميل الصفحة
-    fetchAllSurahs();
-</script>
+        // جلب جميع السور عند تحميل الصفحة
+        fetchAllSurahs();
+    </script>
 
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
