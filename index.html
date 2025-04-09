@@ -3,249 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مواعيد الصلاة</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>موقع الذكاء الصناعي</title>
     <style>
-        /* CSS هنا */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
-            color: #333;
-            text-align: center;
-            padding: 0;
+        /* تنسيق عام */
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            background-color: #ffffff;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 500px;
-            margin: 20px; /* هامش أكبر حول الحاوية */
-        }
-
-        h1 {
-            margin-bottom: 20px;
-            font-size: 1.75rem;
-            color: #2c3e50;
-        }
-
-        .loading {
-            font-size: 1rem;
-            color: #555;
-            margin-top: 20px;
-        }
-
-        table {
+            max-width: 1200px;
+            margin: 0 auto;
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
         }
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            font-size: 0.9rem;
+        /* زر وضع الليل/النهار */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
         }
 
-        th {
-            background-color: #3498db;
-            color: #fff;
-            font-weight: bold;
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        td {
-            background-color: #f9f9f9;
+        /* منطقة المحادثة */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin-bottom: 20px;
         }
 
-        .prayer-name {
-            font-weight: bold;
-            color: #2c3e50;
+        .messages {
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            max-height: 60vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .prayer-time {
-            color: #27ae60;
+        /* منطقة الإدخال */
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
-        .error {
-            color: #e74c3c;
-            font-size: 0.9rem;
-            margin-top: 20px;
+        .input-container textarea {
+            flex: 1;
+            min-height: 50px;
+            max-height: 120px;
+            padding: 12px 50px 12px 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            transition: background-color 0.3s;
         }
 
-        /* تصميم متجاوب للهواتف */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
+        .input-container textarea:focus {
+            background-color: #eaeaea;
+        }
 
-            th, td {
-                padding: 10px;
-                font-size: 0.8rem;
-            }
+        .send-btn {
+            position: absolute;
+            left: 12px;
+            height: 40px;
+            width: 40px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
 
+        .send-btn:hover {
+            background-color: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* رسالة الخطأ */
+        .message {
+            position: absolute;
+            top: -50px;
+            right: 10px;
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 100;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* فقاعات الرسائل */
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            margin-bottom: 12px;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .message-bubble.user {
+            align-self: flex-start;
+            background-color: #e6f2ff;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-bubble.ai {
+            align-self: flex-end;
+            background-color: #f0f0f0;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* تذييل الصفحة */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        /* وضع الليل */
+        .dark-mode {
+            background-color: #121212;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .dark-mode-toggle {
+            background-color: #333;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .messages {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark-mode .input-container {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark-mode .input-container textarea {
+            background-color: #2d2d2d;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .input-container textarea:focus {
+            background-color: #333;
+        }
+
+        .dark-mode .message-bubble.user {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .dark-mode .message-bubble.ai {
+            background-color: #333;
+            color: white;
+        }
+
+        .dark-mode footer {
+            background-color: #1a1a1a;
+            color: #aaa;
+        }
+
+        /* للأجهزة المتحركة */
+        @media (max-width: 768px) {
             .container {
-                padding: 15px;
-                margin: 15px; /* هامش أقل على الشاشات الصغيرة */
-            }
-        }
-
-        @media (max-width: 400px) {
-            h1 {
-                font-size: 1.25rem;
-            }
-
-            th, td {
-                padding: 8px;
-                font-size: 0.75rem;
-            }
-
-            .container {
                 padding: 10px;
-                margin: 10px; /* هامش أقل على الشاشات الصغيرة جدًا */
+            }
+            
+            .input-container textarea {
+                padding: 10px 40px 10px 10px;
+            }
+            
+            .send-btn {
+                width: 36px;
+                height: 36px;
+                left: 8px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- زر التحكم -->
-    <button class="toggle-btn" id="toggleButton">☰</button>
+    <!-- زر وضع الليل/النهار -->
+    <button id="toggleDarkMode" class="dark-mode-toggle">
+        <span id="moon-icon" class="icon">🌙</span>
+        <span id="sun-icon" class="icon" style="display: none;">🌞</span>
+    </button>
 
-
-
-    <!-- القائمة الجانبية -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <img src="images/logo.png" alt="شعار الموقع" class="sidebar-logo">
-            <h2>القائمة</h2>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.html"><img src="images/home-icon.png" alt="الصفحة الرئيسية" class="menu-icon">الرئيسية</a></li>
-                <li><a href="videos.html"><img src="images/videos-icon.png" alt="فيديوهات دينية" class="menu-icon">فيديوهات دينية</a></li>
-                <li><a href="hadif.html"><img src="images/hadif.png" alt="الأحاديث النبوية" class="menu-icon">الأحاديث الدينية</a></li>
-                <li><a href="prayer-times.html"><img src="images/sallla.png" alt="مواعيد الصلاة" class="menu-icon">مواعيد الصلاة</a></li>
-                <li><a href="sirah.html"><img src="images/SIRA-icon.png" alt="السيرة النبوية" class="menu-icon">السيرة النبوية</a></li>
-                <li><a href="pajeqoran.html"><img src="images/qoran.png" alt="قصص الأنبياء" class="menu-icon">القرآن  الكريم</a></li>
-                <li><a href="9ssasanbya.html"><img src="images/9isas-icon.png" alt="قصص الأنبياء" class="menu-icon">قصص الأنبياء</a></li>
-                <li><a href="mawadi3.html"><img src="images/mwadi3.png" alt="مواضيع دينية اخرى" class="menu-icon">مواضيع دينية اخرى</a></li>
-                <li><a href="ad3ya.html"><img src="images/ad3ya.png" alt="قصص الأنبياء" class="menu-icon">الادعية</a></li>
-                <li><a href="about.html"><img src="images/about-icon.png" alt="حول" class="menu-icon">حول</a></li>
-                <li><a href="privacy-policy.html"><img src="images/pravite.png" alt="سياسة الخصوصية "class="menu-icon">سياسة الخصوصية</a></li>
-            </ul>
-        </nav>
-    </div>
     <div class="container">
-        <h1>مواعيد الصلاة</h1>
-        <div class="loading" id="loading">جاري جلب مواعيد الصلاة بناءً على موقعك...</div>
-        <div class="error" id="error"></div>
-
-        <table id="prayerTimesTable">
-            <thead>
-                <tr>
-                    <th>الصلاة</th>
-                    <th>الوقت</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- سيتم ملء هذا القسم بالبيانات من API -->
-            </tbody>
-        </table>
+        <!-- منطقة المحادثة -->
+        <div class="chat-container">
+            <div id="chatMessages" class="messages"></div>
+            
+            <div class="input-container">
+                <textarea id="userInput" placeholder="اكتب هنا..." rows="1"></textarea>
+                <button id="sendButton" class="send-btn">➤</button>
+                <div id="message" class="message">نأسف، الموقع في طور الإصلاح. يرجى المحاولة لاحقًا.</div>
+            </div>
+        </div>
     </div>
+
+    <footer>
+        <p>&copy; 2025 AI Future - جميع الحقوق محفوظة</p>
+    </footer>
 
     <script>
-        // JavaScript هنا
         document.addEventListener('DOMContentLoaded', function() {
-            const loadingElement = document.getElementById('loading');
-            const errorElement = document.getElementById('error');
+            const sendButton = document.querySelector('#sendButton');
+            const messageDiv = document.querySelector('#message');
+            const toggleDarkModeButton = document.querySelector('#toggleDarkMode');
+            const textarea = document.querySelector('#userInput');
+            const chatMessages = document.querySelector('#chatMessages');
+            
+            const moonIcon = document.querySelector('#moon-icon');
+            const sunIcon = document.querySelector('#sun-icon');
+            
+            const apiKey = 'ab8f02c7-c1f6-404d-914a-85141416164c'; // أدخل الـ API Key هنا من DeepAI
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        fetchPrayerTimesByLocation(latitude, longitude);
-                    },
-                    (error) => {
-                        console.error('Error getting location:', error);
-                        loadingElement.style.display = 'none';
-                        errorElement.textContent = 'تعذر الحصول على الموقع الجغرافي. يرجى التأكد من تفعيل خدمة الموقع.';
-                    }
-                );
-            } else {
-                loadingElement.style.display = 'none';
-                errorElement.textContent = 'المتصفح لا يدعم خدمة الموقع الجغرافي.';
+            // Auto-resize textarea as user types
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                if (this.scrollHeight > 120) {
+                    this.style.height = '120px';
+                }
+            });
+            
+            // Focus textarea on page load
+            textarea.focus();
+            
+            // Allow sending message with Enter key (Shift+Enter for new line)
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendButton.click();
+                }
+            });
+            
+            // كود التحقق من مفتاح API محذوف. سيتم التحقق فقط عند الإرسال
+
+            sendButton.addEventListener('click', function() {
+                const userInput = textarea.value.trim();
+                if (userInput) {
+                    // إضافة رسالة المستخدم للمحادثة
+                    addMessage('user', userInput);
+                    
+                    // مسح منطقة الإدخال وإعادة تعيين الارتفاع
+                    textarea.value = '';
+                    textarea.style.height = 'auto';
+                    
+                    // توليد محتوى الذكاء الاصطناعي
+                    generateAIContent(userInput);
+                } else {
+                    alert("الرجاء كتابة شيء في الشات.");
+                }
+            });
+            
+            // تغيير وضع الليل/النهار
+            toggleDarkModeButton.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                
+                // تغيير الأيقونة
+                moonIcon.style.display = document.body.classList.contains('dark-mode') ? 'none' : 'inline';
+                sunIcon.style.display = document.body.classList.contains('dark-mode') ? 'inline' : 'none';
+                
+                // حفظ التفضيل في التخزين المحلي
+                localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            });
+            
+            // استعادة وضع الليل/النهار من التخزين المحلي
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'inline';
             }
+            
+            // إضافة رسالة ترحيبية تلقائية عند تحميل الصفحة
+            setTimeout(() => {
+                addMessage('ai', 'مرحباً! كيف يمكنني مساعدتك اليوم؟');
+            }, 500);
         });
 
-        function fetchPrayerTimesByLocation(latitude, longitude) {
-            const apiUrl = `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=4&timezone=Africa/Casablanca`; // توقيت المغرب
+        function generateAIContent(userInput) {
+            const apiKey = '8ca0b11c-f093-45da-9999-87a6b02527ac'; // أدخل الـ API Key هنا من DeepAI
+            
+            // إضافة رسالة "جاري التحميل" مؤقتة
+            const loadingMessage = document.createElement('div');
+            loadingMessage.classList.add('message-bubble', 'ai', 'loading');
+            loadingMessage.textContent = 'جاري التفكير...';
+            chatMessages.appendChild(loadingMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    const timings = data.data.timings;
-                    displayPrayerTimes(timings);
-                    document.getElementById('loading').style.display = 'none';
-                })
-                .catch(error => {
-                    console.error('Error fetching prayer times:', error);
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('error').textContent = 'تعذر جلب مواعيد الصلاة. يرجى المحاولة مرة أخرى.';
-                });
+            // التحقق من API في كل مرة
+            if (!apiKey || apiKey === '8ca0b11c-f093-45da-9999-87a6b02527ac') {
+                // إزالة رسالة "جاري التحميل"
+                chatMessages.removeChild(loadingMessage);
+                
+                // إظهار رسالة الخطأ في كل مرة
+                const messageDiv = document.querySelector('#message');
+                messageDiv.textContent = "نأسف، الموقع في طور الإصلاح. يرجى المحاولة لاحقًا.";
+                messageDiv.classList.add('show');
+                
+                // إخفاء الرسالة بعد 3 ثوان
+                setTimeout(() => {
+                    messageDiv.classList.remove('show');
+                }, 3000);
+                
+                // إضافة رسالة في المحادثة
+                addMessage('ai', "عذرًا، الموقع في طور الإصلاح حاليًا. يرجى المحاولة لاحقًا.");
+                return;
+            }
+
+            // استدعاء DeepAI API كما في الكود الأصلي
+            fetch('https://api.deepai.org/api/text-generator', {
+                method: 'POST',
+                headers: {
+                    'Api-Key': apiKey,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // إزالة رسالة "جاري التحميل"
+                chatMessages.removeChild(loadingMessage);
+                
+                if (data.error) {
+                    throw new Error(data.error); // إذا كان هناك خطأ، سيُوقف التنفيذ
+                }
+                
+                // إضافة النص المولد من DeepAI كرسالة
+                addMessage('ai', data.output);
+            })
+            .catch(error => {
+                console.error('حدث خطأ:', error);
+                
+                // إزالة رسالة "جاري التحميل" إذا كانت موجودة
+                if (loadingMessage.parentNode) {
+                    chatMessages.removeChild(loadingMessage);
+                }
+                
+                // إظهار رسالة الخطأ في كل مرة
+                const messageDiv = document.querySelector('#message');
+                messageDiv.textContent = "نأسف، الموقع في طور الإصلاح. يرجى المحاولة لاحقًا.";
+                messageDiv.classList.add('show');
+                
+                // إخفاء الرسالة بعد 3 ثوان
+                setTimeout(() => {
+                    messageDiv.classList.remove('show');
+                }, 3000);
+                
+                // إضافة رسالة اعتذار في المحادثة
+                addMessage('ai', "عذرًا، واجهت مشكلة في الاتصال. يرجى المحاولة لاحقًا.");
+            });
         }
 
-        function convertTo12HourFormat(time) {
-            let [hours, minutes] = time.split(':');
-            let period = 'ص'; // صباحًا
-            if (hours >= 12) {
-                period = 'م'; // مساءً
-            }
-            if (hours > 12) {
-                hours = hours - 12;
-            }
-            if (hours === '00') {
-                hours = 12;
-            }
-            return `${hours}:${minutes} ${period}`;
-        }
-
-        function displayPrayerTimes(timings) {
-            const tableBody = document.querySelector('#prayerTimesTable tbody');
-            tableBody.innerHTML = '';
-
-            const prayers = {
-                Fajr: 'الفجر',
-                Dhuhr: 'الظهر',
-                Asr: 'العصر',
-                Maghrib: 'المغرب',
-                Isha: 'العشاء'
-            };
-
-            for (const [prayerKey, prayerName] of Object.entries(prayers)) {
-                const row = document.createElement('tr');
-                const prayerNameCell = document.createElement('td');
-                const prayerTimeCell = document.createElement('td');
-
-                prayerNameCell.textContent = prayerName;
-                prayerNameCell.classList.add('prayer-name');
-
-                const prayerTime = convertTo12HourFormat(timings[prayerKey]);
-                prayerTimeCell.textContent = prayerTime;
-                prayerTimeCell.classList.add('prayer-time');
-
-                row.appendChild(prayerNameCell);
-                row.appendChild(prayerTimeCell);
-                tableBody.appendChild(row);
-            }
+        function addMessage(sender, text) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-bubble', sender);
+            messageElement.textContent = text;
+            
+            chatMessages.appendChild(messageElement);
+            
+            // التمرير إلى أحدث رسالة
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
     </script>
-     <script src="script.js"></script>
 </body>
 </html>
