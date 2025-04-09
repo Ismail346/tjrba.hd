@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>موقع الذكاء الصناعي</title>
     <style>
-        /* تنسيق عام */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -34,7 +33,6 @@
             width: 100%;
         }
 
-        /* زر وضع الليل/النهار */
         .dark-mode-toggle {
             position: fixed;
             top: 20px;
@@ -59,7 +57,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        /* منطقة المحادثة */
         .chat-container {
             flex: 1;
             display: flex;
@@ -80,7 +77,6 @@
             flex-direction: column;
         }
 
-        /* منطقة الإدخال */
         .input-container {
             position: relative;
             display: flex;
@@ -135,7 +131,6 @@
             transform: scale(0.95);
         }
 
-        /* رسالة الخطأ */
         .message {
             position: absolute;
             top: -50px;
@@ -157,7 +152,6 @@
             transform: translateY(0);
         }
 
-        /* فقاعات الرسائل */
         .message-bubble {
             padding: 12px 16px;
             border-radius: 18px;
@@ -181,7 +175,6 @@
             border-bottom-left-radius: 4px;
         }
 
-        /* تذييل الصفحة */
         footer {
             text-align: center;
             padding: 20px;
@@ -191,7 +184,6 @@
             margin-top: auto;
         }
 
-        /* وضع الليل */
         .dark-mode {
             background-color: #121212;
             color: #f5f5f5;
@@ -236,7 +228,6 @@
             color: #aaa;
         }
 
-        /* للأجهزة المتحركة */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -255,21 +246,19 @@
     </style>
 </head>
 <body>
-    <!-- زر وضع الليل/النهار -->
     <button id="toggleDarkMode" class="dark-mode-toggle">
         <span id="moon-icon" class="icon">🌙</span>
         <span id="sun-icon" class="icon" style="display: none;">🌞</span>
     </button>
 
     <div class="container">
-        <!-- منطقة المحادثة -->
         <div class="chat-container">
             <div id="chatMessages" class="messages"></div>
             
             <div class="input-container">
                 <textarea id="userInput" placeholder="اكتب هنا..." rows="1"></textarea>
                 <button id="sendButton" class="send-btn">➤</button>
-                <div id="message" class="message">نأسف، الموقع في طور الإصلاح. يرجى المحاولة لاحقًا.</div>
+                <div id="message" class="message">حدث خطأ في الاتصال، يرجى المحاولة لاحقًا</div>
             </div>
         </div>
     </div>
@@ -289,9 +278,8 @@
             const moonIcon = document.querySelector('#moon-icon');
             const sunIcon = document.querySelector('#sun-icon');
             
-            const apiKey = 'ab8f02c7-c1f6-404d-914a-85141416164c'; // أدخل الـ API Key هنا من DeepAI
+            const apiKey = 'sk-4d01e2d6f8104fef9276b4d2c2ff7060'; // استبدل بمفتاح API الخاص بك من DeepSeek
 
-            // Auto-resize textarea as user types
             textarea.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
@@ -300,10 +288,8 @@
                 }
             });
             
-            // Focus textarea on page load
             textarea.focus();
             
-            // Allow sending message with Enter key (Shift+Enter for new line)
             textarea.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -311,132 +297,98 @@
                 }
             });
             
-            // كود التحقق من مفتاح API محذوف. سيتم التحقق فقط عند الإرسال
-
             sendButton.addEventListener('click', function() {
                 const userInput = textarea.value.trim();
                 if (userInput) {
-                    // إضافة رسالة المستخدم للمحادثة
                     addMessage('user', userInput);
-                    
-                    // مسح منطقة الإدخال وإعادة تعيين الارتفاع
                     textarea.value = '';
                     textarea.style.height = 'auto';
-                    
-                    // توليد محتوى الذكاء الاصطناعي
                     generateAIContent(userInput);
                 } else {
-                    alert("الرجاء كتابة شيء في الشات.");
+                    showErrorMessage('الرجاء كتابة شيء في الشات');
                 }
             });
             
-            // تغيير وضع الليل/النهار
             toggleDarkModeButton.addEventListener('click', function() {
                 document.body.classList.toggle('dark-mode');
-                
-                // تغيير الأيقونة
                 moonIcon.style.display = document.body.classList.contains('dark-mode') ? 'none' : 'inline';
                 sunIcon.style.display = document.body.classList.contains('dark-mode') ? 'inline' : 'none';
-                
-                // حفظ التفضيل في التخزين المحلي
                 localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
             });
             
-            // استعادة وضع الليل/النهار من التخزين المحلي
             if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
                 moonIcon.style.display = 'none';
                 sunIcon.style.display = 'inline';
             }
             
-            // إضافة رسالة ترحيبية تلقائية عند تحميل الصفحة
             setTimeout(() => {
                 addMessage('ai', 'مرحباً! كيف يمكنني مساعدتك اليوم؟');
             }, 500);
         });
 
         function generateAIContent(userInput) {
-            const apiKey = '8ca0b11c-f093-45da-9999-87a6b02527ac'; // أدخل الـ API Key هنا من DeepAI
-            
-            // إضافة رسالة "جاري التحميل" مؤقتة
             const loadingMessage = document.createElement('div');
             loadingMessage.classList.add('message-bubble', 'ai', 'loading');
             loadingMessage.textContent = 'جاري التفكير...';
             chatMessages.appendChild(loadingMessage);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // التحقق من API في كل مرة
-            if (!apiKey || apiKey === '8ca0b11c-f093-45da-9999-87a6b02527ac') {
-                // إزالة رسالة "جاري التحميل"
+            if (!apiKey || apiKey === 'YOUR_DEEPSEEK_API_KEY') {
                 chatMessages.removeChild(loadingMessage);
-                
-                // إظهار رسالة الخطأ في كل مرة
-                const messageDiv = document.querySelector('#message');
-                messageDiv.textContent = "نأسف، الموقع في طور الإصلاح. يرجى المحاولة لاحقًا.";
-                messageDiv.classList.add('show');
-                
-                // إخفاء الرسالة بعد 3 ثوان
-                setTimeout(() => {
-                    messageDiv.classList.remove('show');
-                }, 3000);
-                
-                // إضافة رسالة في المحادثة
-                addMessage('ai', "عذرًا، الموقع في طور الإصلاح حاليًا. يرجى المحاولة لاحقًا.");
+                showErrorMessage('الرجاء إعداد مفتاح API الصحيح من DeepSeek');
+                addMessage('ai', "المفتاح غير صالح، الرجاء التحقق من الإعدادات.");
                 return;
             }
 
-            // استدعاء DeepAI API كما في الكود الأصلي
-            fetch('https://api.deepai.org/api/text-generator', {
+            fetch('https://api.deepseek.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Api-Key': apiKey,
+                    'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ text: userInput })
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [
+                        {
+                            role: "user",
+                            content: userInput
+                        }
+                    ],
+                    temperature: 0.7
+                })
             })
             .then(response => response.json())
             .then(data => {
-                // إزالة رسالة "جاري التحميل"
                 chatMessages.removeChild(loadingMessage);
                 
-                if (data.error) {
-                    throw new Error(data.error); // إذا كان هناك خطأ، سيُوقف التنفيذ
+                if (data.choices && data.choices.length > 0) {
+                    const aiResponse = data.choices[0].message.content;
+                    addMessage('ai', aiResponse);
+                } else {
+                    throw new Error('لا توجد استجابة من الخادم');
                 }
-                
-                // إضافة النص المولد من DeepAI كرسالة
-                addMessage('ai', data.output);
             })
             .catch(error => {
                 console.error('حدث خطأ:', error);
-                
-                // إزالة رسالة "جاري التحميل" إذا كانت موجودة
-                if (loadingMessage.parentNode) {
-                    chatMessages.removeChild(loadingMessage);
-                }
-                
-                // إظهار رسالة الخطأ في كل مرة
-                const messageDiv = document.querySelector('#message');
-                messageDiv.textContent = "نأسف، الموقع في طور الإصلاح. يرجى المحاولة لاحقًا.";
-                messageDiv.classList.add('show');
-                
-                // إخفاء الرسالة بعد 3 ثوان
-                setTimeout(() => {
-                    messageDiv.classList.remove('show');
-                }, 3000);
-                
-                // إضافة رسالة اعتذار في المحادثة
+                chatMessages.removeChild(loadingMessage);
+                showErrorMessage('حدث خطأ في الاتصال بالخادم');
                 addMessage('ai', "عذرًا، واجهت مشكلة في الاتصال. يرجى المحاولة لاحقًا.");
             });
+        }
+
+        function showErrorMessage(text) {
+            const messageDiv = document.querySelector('#message');
+            messageDiv.textContent = text;
+            messageDiv.classList.add('show');
+            setTimeout(() => messageDiv.classList.remove('show'), 3000);
         }
 
         function addMessage(sender, text) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message-bubble', sender);
             messageElement.textContent = text;
-            
             chatMessages.appendChild(messageElement);
-            
-            // التمرير إلى أحدث رسالة
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
     </script>
